@@ -1,0 +1,51 @@
+[project]
+name = "sbtdd-hermes"
+version = "1.0.0"
+requires-python = ">= 3.11"
+description = "Spec + Behavior + TDD workflow skill for Hermes Agent"
+readme = "skills/sbtdd/README.md"
+license = "MIT OR Apache-2.0"
+authors = [{name = "Julian Bolivar"}]
+keywords = ["hermes", "sbtdd", "tdd", "spec-driven", "workflow", "magi", "multi-agent"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Quality Assurance",
+]
+
+[project.optional-dependencies]
+dev = ["pytest", "ruff", "mypy"]
+
+[project.urls]
+Repository = "https://github.com/BolivarTech/sbtdd-hermes"
+Homepage = "https://github.com/BolivarTech/sbtdd-hermes"
+Issues = "https://github.com/BolivarTech/sbtdd-hermes/issues"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+mypy_path = "."
+explicit_package_bases = true
+
+[[tool.mypy.overrides]]
+module = ["tests.*", "conftest"]
+disallow_untyped_defs = false
+disallow_untyped_decorators = false
+disallow_incomplete_defs = false
+check_untyped_defs = false
+warn_return_any = false
+disable_error_code = ["type-arg", "misc", "unused-ignore"]

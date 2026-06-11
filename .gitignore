@@ -1,0 +1,36 @@
+__pycache__/
+*.pyc
+.*_cache/
+.pytest_cache/
+*.egg-info/
+dist/
+build/
+debug.log
+.env
+.venv/
+
+# SBTDD local-only artifacts (not shared, not tracked)
+.hermes/
+sbtdd/
+planning/
+HERMES.md
+HERMES.local.md
+HERMES.changelog.md
+
+# IDE / editor
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Coverage / artifacts
+.coverage/
+htmlcov/
+.mypy_cache/
+
+# Documentation site (if built)
+site/
+docs/_build/
