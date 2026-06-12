@@ -1,0 +1,25 @@
+name: sbtdd
+version: 2.0.0
+description: "SBTDD Spec + Behavior + TDD plugin for Hermes Agent"
+author: Julian Bolivar
+license: MIT OR Apache-2.0
+
+provides_tools:
+  - sbtdd_status
+  - sbtdd_update_state
+
+provides_hooks:
+  - pre_tool_call
+  - on_session_start
+
+provides:
+  commands:
+    - sbtdd
+    - sbtdd-init
+    - sbtdd-check
+
+requires_env:
+  - name: SBTDD_STRICT
+    description: "Enable strict mode (fail on corrupted state instead of fallback)"
+    default: "false"
+    secret: false
