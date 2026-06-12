@@ -1,12 +1,12 @@
 [project]
 name = "sbtdd-hermes"
-version = "1.0.0"
+version = "2.0.0"
 requires-python = ">= 3.11"
-description = "Spec + Behavior + TDD workflow skill for Hermes Agent"
-readme = "skills/sbtdd/README.md"
+description = "SBTDD Spec + Behavior + TDD plugin for Hermes Agent (native plugin with scripts)"
+readme = "README.md"
 license = "MIT OR Apache-2.0"
 authors = [{name = "Julian Bolivar"}]
-keywords = ["hermes", "sbtdd", "tdd", "spec-driven", "workflow", "magi", "multi-agent"]
+keywords = ["hermes", "sbtdd", "tdd", "spec-driven", "workflow", "magi", "plugin"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
@@ -20,7 +20,10 @@ classifiers = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest", "ruff", "mypy"]
+dev = ["pytest", "ruff", "mypy", "filelock"]
+
+[project.entry-points."hermes_agent.plugins"]
+sbtdd = "sbtdd_hermes:register"
 
 [project.urls]
 Repository = "https://github.com/BolivarTech/sbtdd-hermes"
