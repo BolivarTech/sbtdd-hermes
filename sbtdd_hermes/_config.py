@@ -1,7 +1,7 @@
 import os
 
 # === TDD-Guard ===
-TDDGUARD_TOOL_NAMES = {"write_file", "patch", "terminal"}
+TDDGUARD_TOOL_NAMES = {"write_file", "patch"}
 TDDGUARD_TEST_PATTERNS = [
     r"tests?/",
     r"test_[^/]+\.py$",

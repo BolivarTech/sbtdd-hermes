@@ -2,6 +2,7 @@
 name = "sbtdd-hermes"
 version = "2.0.0"
 requires-python = ">= 3.11"
+dependencies = ["filelock"]
 description = "SBTDD Spec + Behavior + TDD plugin for Hermes Agent (native plugin with scripts)"
 readme = "README.md"
 license = "MIT OR Apache-2.0"
@@ -20,7 +21,7 @@ classifiers = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest", "ruff", "mypy", "filelock"]
+dev = ["pytest", "ruff", "mypy"]
 
 [project.entry-points."hermes_agent.plugins"]
 sbtdd = "sbtdd_hermes:register"
