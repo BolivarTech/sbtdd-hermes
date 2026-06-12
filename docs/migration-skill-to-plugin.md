@@ -277,4 +277,4 @@ from sbtdd_hermes._config import PHASE_TRANSITIONS, TDDGUARD_TOOL_NAMES
 ---
 
 **Last updated:** 2026-06-12  
-**Version:** SBTDD-Hermes v2.0.0
+**Version:** SBTDD-Hermes v2.0.1

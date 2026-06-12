@@ -1,5 +1,5 @@
 """
-TDD: README v2.0.0 plugin documentation.
+TDD: README v2.0.1 plugin documentation.
 
 This test MUST fail before implementation (RED phase).
 """
@@ -10,8 +10,8 @@ from pathlib import Path
 README_PATH = Path(__file__).parent.parent / "README.md"
 
 
-class TestReadmeV200:
-    """RED: README must document plugin v2.0.0 features."""
+class TestReadmeV201:
+    """RED: README must document plugin v2.0.1 features."""
 
     def test_readme_exists(self):
         assert README_PATH.exists(), "README.md not found at project root"
@@ -45,9 +45,9 @@ class TestReadmeV200:
         assert "entry-point" in content.lower() or "entry_point" in content.lower(), \
             "README should mention entry-point registration"
 
-    def test_readme_has_version_200(self):
+    def test_readme_has_version_201(self):
         content = README_PATH.read_text(encoding="utf-8")
-        assert "2.0.0" in content, "README should mention version 2.0.0"
+        assert "2.0.1" in content, "README should mention version 2.0.1"
 
     def test_readme_documents_hooks(self):
         content = README_PATH.read_text(encoding="utf-8")

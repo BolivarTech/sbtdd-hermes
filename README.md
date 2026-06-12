@@ -148,7 +148,7 @@ Expected output:
 
 ```
 User plugins (1):
-  ● sbtdd v2.0.0 [enabled]
+  ● sbtdd v2.0.1 [enabled]
 ```
 
 If it shows `[not enabled] — not enabled in config`, run `hermes plugins enable sbtdd` **outside** Hermes and restart again.
