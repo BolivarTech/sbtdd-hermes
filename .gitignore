@@ -34,3 +34,5 @@ htmlcov/
 # Documentation site (if built)
 site/
 docs/_build/
+
+/.hermes/

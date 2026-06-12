@@ -31,7 +31,7 @@ def detect_stack(root: Path) -> str | None:
     return None
 
 
-def render_hermes_local_md(stack: str | None, author: str | None = None, error_type: str | None = None) -> str:
+def render_hermes_local_md(stack: str | None, author: str | None = None, error_type: str | None = None, backend: str = "ollama") -> str:
     """Render HERMES.local.md template."""
     # TODO: Read from templates/HERMES.local.md.tmpl and substitute variables
     lines = [

@@ -36,6 +36,10 @@ VALID_PHASES = set(PHASE_TRANSITIONS.keys())
 STATE_UPDATE_FIELDS = {
     "magi_iterations_used": {"type": int, "min": 0, "max": 999},
     "magi_iteration_budget": {"type": int, "min": 1, "max": 99},
+    "magi_backend": {
+        "type": str,
+        "choices": {"ollama", "openrouter", "claude", "openai"},
+    },
     "magi_target_verdict": {
         "type": str,
         "choices": {

@@ -39,6 +39,7 @@ class SessionState:
     last_verification_result: str | None = None
     magi_iteration_budget: int | None = None
     magi_iterations_used: int = 0
+    magi_backend: str = "ollama"
     magi_target_verdict: str | None = None
     tdd_guard_override: dict = field(default_factory=dict)
     tdd_guard_override_count: int = 0

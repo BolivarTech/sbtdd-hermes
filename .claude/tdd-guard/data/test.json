@@ -76,6 +76,41 @@
       ]
     },
     {
+      "moduleId": "tests/test_ollama_backend.py",
+      "tests": [
+        {
+          "name": "test_session_state_has_magi_backend_field",
+          "fullName": "tests/test_ollama_backend.py::TestOllamaBackendInStatus::test_session_state_has_magi_backend_field",
+          "state": "passed"
+        },
+        {
+          "name": "test_sbtdd_status_reports_magi_backend",
+          "fullName": "tests/test_ollama_backend.py::TestOllamaBackendInStatus::test_sbtdd_status_reports_magi_backend",
+          "state": "passed"
+        },
+        {
+          "name": "test_magi_backend_is_whitelisted_for_update",
+          "fullName": "tests/test_ollama_backend.py::TestOllamaBackendInStatus::test_magi_backend_is_whitelisted_for_update",
+          "state": "passed"
+        },
+        {
+          "name": "test_magi_backend_choices_enforced",
+          "fullName": "tests/test_ollama_backend.py::TestOllamaBackendInStatus::test_magi_backend_choices_enforced",
+          "state": "passed"
+        },
+        {
+          "name": "test_init_command_accepts_ollama_flag",
+          "fullName": "tests/test_ollama_backend.py::TestOllamaInitFlag::test_init_command_accepts_ollama_flag",
+          "state": "passed"
+        },
+        {
+          "name": "test_ollama_config_scaffolded_when_flag_present",
+          "fullName": "tests/test_ollama_backend.py::TestOllamaInitFlag::test_ollama_config_scaffolded_when_flag_present",
+          "state": "skipped"
+        }
+      ]
+    },
+    {
       "moduleId": "tests/test_plugin.py",
       "tests": [
         {

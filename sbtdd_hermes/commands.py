@@ -36,8 +36,12 @@ def _make_sbtdd_init_handler(ctx):
         root = Path(".")
         stack = detect_stack(root)
         
-        # Generate HERMES.local.md
-        hermes_md = render_hermes_local_md(stack)
+        # Parse --ollama flag
+        use_ollama = "--ollama" in args.split() if args else False
+        
+        # Generate HERMES.local.md with Ollama backend if requested
+        backend = "ollama" if use_ollama else "ollama"  # default to ollama
+        hermes_md = render_hermes_local_md(stack, backend=backend)
         (root / "HERMES.local.md").write_text(hermes_md, encoding="utf-8")
         
         # Merge gitignore
@@ -54,6 +58,11 @@ def _make_sbtdd_init_handler(ctx):
         # Seed spec
         spec_path = seed_spec_behavior_base(root)
         
+        # Ollama scaffolding if requested
+        ollama_msg = ""
+        if use_ollama:
+            ollama_msg = "\n- Ollama backend configured (default)"
+        
         # Summary table
         lines = [
             "# SBTDD Init Summary",
@@ -62,9 +71,11 @@ def _make_sbtdd_init_handler(ctx):
             f"|------|--------|",
             f"| Stack detected | {stack or 'unknown'} |",
             f"| HERMES.local.md | created |",
+            f"| MAGI backend | {backend} |",
             f"| .gitignore entries | {len(added)} added, {len(present)} already present |",
             f"| Directories | {', '.join(dirs) or 'all exist'} |",
             f"| Spec base | {spec_path} |",
+            f"| Ollama | {'enabled' if use_ollama else 'default'} |",
             "",
             "Next: Edit `sbtdd/spec-behavior-base.md` then run `/sbtdd` to begin.",
         ]
@@ -124,6 +135,7 @@ def _make_status_handler(ctx):
             "task_id": state.current_task_id,
             "task_title": state.current_task_title,
             "magi_iterations": f"{state.magi_iterations_used}/{state.magi_iteration_budget}",
+            "magi_backend": state.magi_backend,
         }
     return handler
 
