@@ -1,12 +1,20 @@
-#### C/C++ (CMake)
+# Verification Commands — C/C++ Stack
+
+## §0.1 Per-Phase Verification
 
 ```bash
-cmake --build build --target all        # Compiles without warnings
-ctest --test-dir build                  # All pass, 0 fail
+# Build
+cmake --build build
+
+# Tests
+ctest --test-dir build --output-on-failure
+
+# Static analysis (optional)
+cppcheck --enable=all --error-exitcode=1 src/
 ```
 
-If using Clang-Tidy:
+## Phase-specific notes
 
-```bash
-clang-tidy -p build src/**/*.cpp        # 0 warnings
-```
+- **Red:** `ctest` should fail (tests written, no implementation)
+- **Green:** `ctest` must pass (implementation added)
+- **Refactor:** All checks above must pass
