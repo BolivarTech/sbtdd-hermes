@@ -25,6 +25,16 @@ def test_register_tools():
     names = [c.kwargs.get("name", c[0][0]) for c in calls]
     assert "sbtdd_status" in names
     assert "sbtdd_update_state" in names
+    
+    # Verify toolset and check_fn are passed (Hermes API requirement)
+    for c in calls:
+        args = c.args
+        kwargs = c.kwargs
+        if args:
+            assert len(args) >= 2, "register_tool must have toolset arg"
+            assert args[1] == "sbtdd", "toolset should be 'sbtdd'"
+        if "check_fn" in kwargs:
+            assert callable(kwargs["check_fn"])
 
 
 def test_register_hooks():

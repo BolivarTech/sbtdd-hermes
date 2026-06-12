@@ -5,14 +5,59 @@ from dataclasses import dataclass, field, asdict
 from pathlib import Path
 from typing import Any
 
-import filelock
-
 from ._config import (
     STATE_SCHEMA_VERSION,
     FILELOCK_RETRY_ATTEMPTS,
     FILELOCK_RETRY_DELAYS,
     STRICT_MODE,
 )
+
+# Optional filelock — Hermes stripped venv may not have it
+try:
+    import filelock
+    _HAS_FILELOCK = True
+except ImportError:
+    _HAS_FILELOCK = False
+
+
+class _FallbackFileLock:
+    """Cross-platform file lock fallback when filelock is unavailable."""
+    def __init__(self, lock_path: str) -> None:
+        self.lock_path = Path(lock_path)
+
+    def acquire(self, timeout: float = -1) -> None:
+        import time
+        start = time.time()
+        while True:
+            try:
+                # Exclusive creation — fails if lock exists
+                fd = os.open(str(self.lock_path), os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+                os.close(fd)
+                return
+            except FileExistsError:
+                if timeout > 0 and time.time() - start > timeout:
+                    raise TimeoutError(f"Could not acquire lock {self.lock_path}")
+                time.sleep(0.05)
+
+    def release(self) -> None:
+        try:
+            self.lock_path.unlink()
+        except FileNotFoundError:
+            pass
+
+    def __enter__(self) -> "_FallbackFileLock":
+        self.acquire()
+        return self
+
+    def __exit__(self, *args: Any) -> None:
+        self.release()
+
+
+def _get_lock(lock_path: str) -> Any:
+    """Return a file lock context manager (filelock or fallback)."""
+    if _HAS_FILELOCK:
+        return filelock.FileLock(lock_path, timeout=5)
+    return _FallbackFileLock(lock_path)
 
 
 class ConcurrencyError(RuntimeError):
@@ -99,7 +144,7 @@ def save_state(path: Path, state: SessionState, expected_revision: int) -> None:
 
     for attempt, delay in enumerate(FILELOCK_RETRY_DELAYS):
         try:
-            with filelock.FileLock(str(path) + ".lock", timeout=5):
+            with _get_lock(str(path) + ".lock"):
                 current = load_state(path)
                 if current.state_revision != expected_revision:
                     raise ConcurrencyError(

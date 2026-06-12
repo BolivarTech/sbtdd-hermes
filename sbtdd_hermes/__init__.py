@@ -32,6 +32,7 @@ def register(ctx: Any) -> None:
 
     ctx.register_tool(
         "sbtdd_status",
+        "sbtdd",  # toolset
         schema={
             "type": "object",
             "properties": {
@@ -44,9 +45,11 @@ def register(ctx: Any) -> None:
             "required": ["phase", "magi_backend"],
         },
         handler=_make_status_handler(ctx),
+        check_fn=lambda: True,
     )
     ctx.register_tool(
         "sbtdd_update_state",
+        "sbtdd",  # toolset
         schema={
             "type": "object",
             "properties": {
@@ -58,6 +61,7 @@ def register(ctx: Any) -> None:
             "required": ["field", "value", "expected_revision"],
         },
         handler=_make_update_state_handler(ctx),
+        check_fn=lambda: True,
     )
 
     ctx.register_hook("pre_tool_call", _on_pre_tool_call)
