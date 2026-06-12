@@ -28,7 +28,7 @@ def suggest_commit(phase: str, task: str, description: str = "") -> str:
         return f"{prefix} {task}"
 
 
-def main():
+def main() -> None:
     import argparse
     parser = argparse.ArgumentParser(description="SBTDD Commit Message Helper")
     parser.add_argument("--phase", required=True, choices=["red", "green", "refactor", "close_task"])

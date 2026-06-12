@@ -8,7 +8,9 @@ from pathlib import Path
 from .git_status import check_git_status
 
 
-def check_drift(state_path: Path) -> dict:
+from typing import Any
+
+def check_drift(state_path: Path) -> dict[str, Any]:
     """Detect drift between state and git history."""
     # Load state
     try:
@@ -69,12 +71,12 @@ def _is_recoverable(state_phase: str, expected_phase: str) -> bool:
     return order.get(state_phase, -1) < order.get(expected_phase, -1)
 
 
-def main():
+def main() -> None:
     import argparse
     parser = argparse.ArgumentParser(description="SBTDD Drift Checker")
-    parser.add_argument("--state", default=".hermes/session-state.json")
+    parser.add_argument("--state", type=Path, default=Path(".hermes/session-state.json"))
     args = parser.parse_args()
-    print(json.dumps(check_drift(Path(args.state)), indent=2))
+    print(json.dumps(check_drift(args.state), indent=2))
 
 
 if __name__ == "__main__":

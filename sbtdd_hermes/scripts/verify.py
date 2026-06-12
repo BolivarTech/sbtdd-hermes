@@ -6,6 +6,7 @@ import subprocess
 import sys
 import json
 from pathlib import Path
+from typing import Any
 
 SCRIPT_TIMEOUT = 60
 
@@ -24,12 +25,12 @@ def run_with_error_handling(cmd: list[str], timeout: int = SCRIPT_TIMEOUT) -> tu
         return False, f"Unexpected error: {e}"
 
 
-def run_verification(stack: str, check_only: bool = False) -> dict:
+def run_verification(stack: str, check_only: bool = False) -> dict[str, Any]:
     """Run verification commands for the given stack."""
     commands = _get_commands(stack)
-    results = []
+    results: list[dict[str, str]] = []
     all_passed = True
-    
+
     for name, cmd in commands:
         if check_only:
             # Just check if tool exists
@@ -42,19 +43,19 @@ def run_verification(stack: str, check_only: bool = False) -> dict:
             results.append({"name": name, "status": "PASSED" if ok else "FAILED", "detail": msg})
             if not ok:
                 all_passed = False
-    
+
     return {"stack": stack, "all_passed": all_passed, "results": results}
 
 
 def _get_commands(stack: str) -> list[tuple[str, list[str]]]:
     """Return verification commands for stack."""
     base = Path(__file__).parent.parent.parent / "templates" / "verification"
-    
+
     # Try to load from template file
     template_file = base / f"{stack}.md"
     if template_file.exists():
         return _parse_commands_from_file(template_file)
-    
+
     # Default commands
     defaults = {
         "rust": [
@@ -80,7 +81,7 @@ def _get_commands(stack: str) -> list[tuple[str, list[str]]]:
 
 def _parse_commands_from_file(path: Path) -> list[tuple[str, list[str]]]:
     """Parse verification commands from markdown template."""
-    commands = []
+    commands: list[tuple[str, list[str]]] = []
     with open(path, "r", encoding="utf-8") as f:
         for line in f:
             line = line.strip()
@@ -95,13 +96,13 @@ def _parse_commands_from_file(path: Path) -> list[tuple[str, list[str]]]:
     return commands
 
 
-def main():
+def main() -> None:
     import argparse
     parser = argparse.ArgumentParser(description="SBTDD Verification Runner")
     parser.add_argument("--stack", default="python", choices=["rust", "python", "cpp"])
     parser.add_argument("--check-only", action="store_true", help="Check tool availability only")
     args = parser.parse_args()
-    
+
     result = run_verification(args.stack, check_only=args.check_only)
     print(json.dumps(result, indent=2))
     sys.exit(0 if result["all_passed"] else 1)

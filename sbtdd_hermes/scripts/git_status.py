@@ -4,11 +4,11 @@ Git status analyzer.
 
 import json
 import subprocess
+from typing import Any
 
-
-def check_git_status() -> dict:
+def check_git_status() -> dict[str, Any]:
     """Run git status and return parsed results."""
-    result = {
+    result: dict[str, Any] = {
         "has_changes": False,
         "modified": [],
         "staged": [],
@@ -16,7 +16,7 @@ def check_git_status() -> dict:
         "last_commit_prefix": None,
         "last_commit_message": None,
     }
-    
+
     # git status --short
     ok, output = _run(["git", "status", "--short"])
     if ok and output.strip():
@@ -30,23 +30,23 @@ def check_git_status() -> dict:
                 result["modified"].append(path)
             elif status.startswith("??"):
                 result["untracked"].append(path)
-    
+
     # git log --oneline -1
     ok, output = _run(["git", "log", "--format=%s", "-1"])
     if ok and output.strip():
         msg = output.strip()
         result["last_commit_message"] = msg
         result["last_commit_prefix"] = msg.split(":")[0] if ":" in msg else msg.split()[0]
-    
+
     return result
 
 
-def get_git_log(n: int = 5) -> list[dict]:
+def get_git_log(n: int = 5) -> list[dict[str, str]]:
     """Return last N commits."""
     ok, output = _run(["git", "log", "--oneline", f"-n{n}"])
     if not ok:
         return []
-    
+
     commits = []
     for line in output.strip().splitlines():
         if " " in line:
@@ -65,14 +65,14 @@ def _run(cmd: list[str]) -> tuple[bool, str]:
         return False, str(e)
 
 
-def main():
+def main() -> None:
     import argparse
     parser = argparse.ArgumentParser(description="SBTDD Git Status Analyzer")
     parser.add_argument("--check", action="store_true", help="Check git status for /sbtdd-check")
     parser.add_argument("--log", type=int, help="Show last N commits")
     parser.add_argument("--last-prefix", action="store_true", help="Show last commit prefix")
     args = parser.parse_args()
-    
+
     if args.log:
         print(json.dumps(get_git_log(args.log), indent=2))
     elif args.last_prefix:

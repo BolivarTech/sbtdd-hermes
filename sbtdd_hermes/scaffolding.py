@@ -81,10 +81,12 @@ def render_hermes_local_md(stack: str | None, author: str | None = None, error_t
     return "\n".join(lines)
 
 
-def merge_gitignore(root: Path, entries: list[str]) -> tuple[list, list, list]:
+def merge_gitignore(root: Path, entries: list[str]) -> tuple[list[str], list[str], list[str]]:
     """Merge entries into .gitignore idempotently."""
     gitignore = root / ".gitignore"
-    added, already_present, removed = [], [], []
+    added: list[str] = []
+    already_present: list[str] = []
+    removed: list[str] = []
     
     existing = set()
     if gitignore.exists():
