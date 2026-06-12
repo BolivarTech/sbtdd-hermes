@@ -132,6 +132,7 @@ def _make_sbtdd_check_handler(ctx):
     def handler(args: str) -> str:
         root = Path(".")
         checks = []
+        warnings_list = []
         
         # Check 1: HERMES.local.md exists
         hermes_exists = (root / "HERMES.local.md").exists()
@@ -142,14 +143,26 @@ def _make_sbtdd_check_handler(ctx):
         checks.append(("Directories (sbtdd, planning, .hermes)", dirs_ok))
         
         # Check 3: State file exists
-        state_exists = (root / ".hermes" / "session-state.json").exists()
+        state_path = root / ".hermes" / "session-state.json"
+        state_exists = state_path.exists()
         checks.append(("Session state file", state_exists))
         
-        # Check 4: Stack detected
+        # Check 4: MAGI backend config
+        backend = "unknown"
+        backend_ok = False
+        if state_exists:
+            state = load_state(state_path)
+            backend = state.magi_backend
+            backend_ok = backend in _config.STATE_UPDATE_FIELDS.get("magi_backend", {}).get("choices", set())
+            if not backend_ok:
+                warnings_list.append(f"Invalid MAGI backend '{backend}' (expected: ollama, openrouter, claude, openai)")
+        checks.append((f"MAGI backend ({backend})", backend_ok))
+        
+        # Check 5: Stack detected
         stack = detect_stack(root)
         checks.append(("Stack detected", bool(stack)))
         
-        # Check 5: Git repo initialized
+        # Check 6: Git repo initialized
         git_exists = (root / ".git").exists()
         checks.append(("Git repository", git_exists))
         
@@ -160,6 +173,13 @@ def _make_sbtdd_check_handler(ctx):
         for name, ok in checks:
             status = "✅ PASS" if ok else "❌ FAIL"
             lines.append(f"| {name} | {status} |")
+        
+        # Add warnings
+        if warnings_list:
+            lines.append("")
+            lines.append("## Warnings")
+            for w in warnings_list:
+                lines.append(f"- ⚠️ {w}")
         
         all_ok = all(ok for _, ok in checks)
         lines.append("")
