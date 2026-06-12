@@ -3,11 +3,12 @@ Handlers for slash commands:
   /sbtdd
   /sbtdd-init
   /sbtdd-check
+  /sbtdd-override
 """
 
 from pathlib import Path
 
-from . import prompts
+from .state import load_state, save_state
 from .scaffolding import (
     detect_stack,
     render_hermes_local_md,
@@ -16,6 +17,7 @@ from .scaffolding import (
     seed_spec_behavior_base,
     scaffold_ollama_config,
 )
+from . import _config
 from .state import load_state, SessionState
 
 
@@ -80,6 +82,49 @@ def _make_sbtdd_init_handler(ctx):
             "Next: Edit `sbtdd/spec-behavior-base.md` then run `/sbtdd` to begin.",
         ]
         return "\n".join(lines)
+    return handler
+
+
+def _make_sbtdd_override_handler(ctx):
+    def handler(args: str) -> str:
+        import re
+        state_path = Path(".hermes/session-state.json")
+        
+        # Parse arguments: --tool TOOL [--path PATH] [--reason REASON]
+        tool_match = re.search(r"--tool\s+(\S+)", args)
+        path_match = re.search(r"--path\s+(\S+)", args)
+        reason_match = re.search(r"--reason\s+(.+?)(?=\s+--|$)", args)
+        
+        if not tool_match:
+            return "Error: --tool is required. Usage: /sbtdd-override --tool write_file [--path src/prod.py] [--reason \"explanation\"]"
+        
+        tool = tool_match.group(1)
+        path = path_match.group(1) if path_match else None
+        reason = reason_match.group(1) if reason_match else ""
+        
+        # Load state
+        state = load_state(state_path)
+        
+        # Check limit
+        if state.tdd_guard_override_count >= 3:
+            return f"Error: Override limit exceeded ({state.tdd_guard_override_count}/3)."
+        
+        # Set override
+        override = {"tool": tool}
+        if path:
+            override["path"] = path
+        if reason:
+            override["reason"] = reason
+        
+        import dataclasses
+        new_state = dataclasses.replace(state, tdd_guard_override=override)
+        
+        try:
+            save_state(state_path, new_state, expected_revision=state.state_revision)
+            return f"Override set for tool '{tool}'" + (f" on path '{path}'" if path else "") + f". Used {state.tdd_guard_override_count}/3."
+        except Exception as e:
+            return f"Error saving state: {e}"
+    
     return handler
 
 

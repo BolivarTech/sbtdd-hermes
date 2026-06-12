@@ -14,6 +14,7 @@ from .commands import (
     _make_sbtdd_handler,
     _make_sbtdd_init_handler,
     _make_sbtdd_check_handler,
+    _make_sbtdd_override_handler,
     _make_status_handler,
     _make_update_state_handler,
 )
@@ -27,6 +28,7 @@ def register(ctx):
     ctx.register_command("sbtdd", handler=_make_sbtdd_handler(ctx))
     ctx.register_command("sbtdd-init", handler=_make_sbtdd_init_handler(ctx))
     ctx.register_command("sbtdd-check", handler=_make_sbtdd_check_handler(ctx))
+    ctx.register_command("sbtdd-override", handler=_make_sbtdd_override_handler(ctx))
 
     ctx.register_tool(
         "sbtdd_status",
