@@ -91,13 +91,28 @@ def _on_pre_tool_call(session_id, tool_name, tool_args, **kwargs):
     # Check override scoped
     override = state.tdd_guard_override
     if override and override.get("tool") == tool_name:
+        # Check limit FIRST
+        if state.tdd_guard_override_count >= _config.MAX_OVERRIDE_PER_SESSION:
+            return {
+                "blocked": True,
+                "reason": (
+                    f"TDD-Guard override limit exceeded "
+                    f"({state.tdd_guard_override_count}/{_config.MAX_OVERRIDE_PER_SESSION})."
+                ),
+            }
+        
         if "path" in override:
             tool_path = tool_args.get("path", "")
             if tool_path != override["path"]:
                 return {"blocked": True, "reason": "Override scoped to different path"}
 
-        # Consumir override (one-shot)
-        new_state = dataclasses.replace(state, tdd_guard_override={})
+        # Consumir override (one-shot) + incrementar count
+        new_state = dataclasses.replace(
+            state,
+            tdd_guard_override={},
+            tdd_guard_override_count=state.tdd_guard_override_count + 1,
+            last_override_reason=override.get("reason", ""),
+        )
         try:
             save_state(state_path, new_state, expected_revision=state.state_revision)
         except Exception:
