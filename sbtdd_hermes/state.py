@@ -130,6 +130,12 @@ def save_state(path: Path, state: SessionState, expected_revision: int) -> None:
 
 
 def migrate_state(data: dict[str, Any]) -> SessionState:
+    """Forward-only migration: upgrades old schema versions to current.
+
+    NOTE: This migration is forward-only. Downgrading the plugin after
+    state migration may leave the state file unreadable by older versions.
+    Re-installing an older plugin requires manual state reset or re-init.
+    """
     old_version = data.get("schema_version", 1)
 
     if old_version == 1:

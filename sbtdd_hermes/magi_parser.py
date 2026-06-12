@@ -10,19 +10,38 @@ class ParseError(RuntimeError):
 
 
 def _do_parse(report: str) -> dict[str, Any]:
-    if "+==================================================+" not in report:
-        raise ParseError("Missing MAGI banner")
+    """Parse MAGI report with graceful fallback for fragmented/chunked input."""
+    # Primary: strict parsing with banner
+    if "+==================================================+" in report:
+        return _parse_strict(report)
+    # Fallback: extract CONSENSUS line without banner (e.g. streaming chunks)
+    return _parse_fallback(report)
+
+
+def _parse_strict(report: str) -> dict[str, Any]:
+    """Parse standard MAGI report with banner."""
     if "CONSENSUS:" not in report:
         raise ParseError("Missing consensus section")
+    return _extract_verdict_and_findings(report)
 
+
+def _parse_fallback(report: str) -> dict[str, Any]:
+    """Parse fragmented or banner-less MAGI output."""
+    if "CONSENSUS:" not in report:
+        raise ParseError("Missing consensus section")
+    return _extract_verdict_and_findings(report)
+
+
+def _extract_verdict_and_findings(report: str) -> dict[str, Any]:
+    """Shared extraction logic for strict and fallback parsing paths."""
     verdict_match = re.search(MAGI_VEREDICTO_RE, report)
     if not verdict_match:
         raise ParseError("Could not extract verdict")
-    
+
     # Strip trailing vote counts like "(3-0)"
     raw_verdict = verdict_match.group(1).strip()
     verdict = re.sub(r"\s*\(\d+-\d+\)\s*$", "", raw_verdict)
-    
+
     findings: list[dict[str, str]] = []
     for line in report.splitlines():
         m = re.match(MAGI_FINDING_RE, line)

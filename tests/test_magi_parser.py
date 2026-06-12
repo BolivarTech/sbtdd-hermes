@@ -42,7 +42,7 @@ class TestParseMagiReport:
         assert "CRITICAL" in severities
 
     def test_parse_missing_banner(self):
-        with pytest.raises(ParseError, match="Missing MAGI banner"):
+        with pytest.raises(ParseError, match="Missing consensus section"):
             parse_magi_report("random text without banner")
 
     def test_parse_missing_consensus(self):
