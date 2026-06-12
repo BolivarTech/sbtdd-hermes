@@ -21,7 +21,7 @@ STATE_SCHEMA_VERSION = 1
 MAGI_SUPPORTED_FORMATS = ["2.0"]
 MAGI_BANNER_RE = r"\+={52}\+"
 MAGI_VEREDICTO_RE = r"\|\s+CONSENSUS:\s+([^|]+)\s+\|"
-MAGI_FINDING_RE = r"\[([!]+)\]\s+\[(\w+)\]\s+([^\n]*)"
+MAGI_FINDING_RE = r"\[([^\]]+)\]\s+\[(\w+)\]\s+([^\n]*)"
 
 # === Phase State Machine ===
 PHASE_TRANSITIONS = {

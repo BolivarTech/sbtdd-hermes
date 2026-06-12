@@ -18,7 +18,11 @@ def _do_parse(report: str) -> dict:
     verdict_match = re.search(MAGI_VEREDICTO_RE, report)
     if not verdict_match:
         raise ParseError("Could not extract verdict")
-
+    
+    # Strip trailing vote counts like "(3-0)"
+    raw_verdict = verdict_match.group(1).strip()
+    verdict = re.sub(r"\s*\(\d+-\d+\)\s*$", "", raw_verdict)
+    
     findings = []
     for line in report.splitlines():
         m = re.match(MAGI_FINDING_RE, line)
@@ -26,7 +30,7 @@ def _do_parse(report: str) -> dict:
             findings.append({"severity": m.group(2), "title": m.group(3)})
 
     return {
-        "veredicto": verdict_match.group(1).strip(),
+        "veredicto": verdict,
         "findings": findings,
         "format_version": "2.0",
         "parse_confidence": 1.0 if findings else 0.5,

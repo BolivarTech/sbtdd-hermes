@@ -7,7 +7,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from git_status import check_git_status, get_git_log
+from .git_status import check_git_status, get_git_log
 
 
 def check_drift(state_path: Path) -> dict:
