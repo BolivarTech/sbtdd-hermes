@@ -34,8 +34,14 @@ def register(ctx):
         "sbtdd_status",
         schema={
             "type": "object",
-            "properties": {},
-            "required": [],
+            "properties": {
+                "phase": {"type": "string", "description": "Current TDD phase (red, green, refactor, done)"},
+                "task_id": {"type": ["string", "null"], "description": "Current task identifier"},
+                "task_title": {"type": ["string", "null"], "description": "Current task title"},
+                "magi_iterations": {"type": "string", "description": "MAGI iterations used/budget"},
+                "magi_backend": {"type": "string", "description": "MAGI backend (ollama, openrouter, claude, openai)"},
+            },
+            "required": ["phase", "magi_backend"],
         },
         handler=_make_status_handler(ctx),
     )
