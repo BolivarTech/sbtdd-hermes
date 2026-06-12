@@ -6,6 +6,7 @@ Entry point: register(ctx)
 import dataclasses
 import re
 from pathlib import Path
+from typing import Any
 
 from . import _config
 from .state import load_state, save_state, SessionState
@@ -22,7 +23,7 @@ from .commands import (
 _state_cache: dict[str, tuple[SessionState, int]] = {}
 
 
-def register(ctx):
+def register(ctx: Any) -> None:
     """Register plugin commands, tools, and hooks."""
     ctx.register_command("sbtdd", handler=_make_sbtdd_handler(ctx))
     ctx.register_command("sbtdd-init", handler=_make_sbtdd_init_handler(ctx))
@@ -84,7 +85,7 @@ def _is_test_file(path: str) -> bool:
     return False
 
 
-def _on_pre_tool_call(session_id, tool_name, tool_args, **kwargs):
+def _on_pre_tool_call(session_id: str, tool_name: str, tool_args: dict[str, Any], **kwargs: Any) -> dict[str, Any]:
     """Hook TDD-Guard: bloquea writes violatorios segun fase."""
     if tool_name not in _config.TDDGUARD_TOOL_NAMES:
         return {"blocked": False}
@@ -166,7 +167,7 @@ def _on_pre_tool_call(session_id, tool_name, tool_args, **kwargs):
     return {"blocked": False}
 
 
-def _on_session_start(session_id, **kwargs):
+def _on_session_start(session_id: str, **kwargs: Any) -> str | None:
     """Hook de sesion: inicializa estado si existe plan."""
     state_path = Path(".hermes/session-state.json")
     if state_path.exists():

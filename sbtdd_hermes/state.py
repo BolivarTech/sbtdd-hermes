@@ -51,7 +51,7 @@ class SessionState:
         return asdict(self)
 
     @classmethod
-    def from_dict(cls, data: dict) -> "SessionState":
+    def from_dict(cls, data: dict[str, Any]) -> "SessionState":
         return cls(**data)
 
 
@@ -129,7 +129,7 @@ def save_state(path: Path, state: SessionState, expected_revision: int) -> None:
                 ) from e
 
 
-def migrate_state(data: dict) -> SessionState:
+def migrate_state(data: dict[str, Any]) -> SessionState:
     old_version = data.get("schema_version", 1)
 
     if old_version == 1:

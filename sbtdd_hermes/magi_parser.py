@@ -1,6 +1,6 @@
 import multiprocessing
 import re
-from typing import Callable, Any
+from typing import Callable, Any, cast
 
 from ._config import MAGI_PARSE_TIMEOUT, MAGI_VEREDICTO_RE, MAGI_FINDING_RE
 
@@ -23,7 +23,7 @@ def _do_parse(report: str) -> dict[str, Any]:
     raw_verdict = verdict_match.group(1).strip()
     verdict = re.sub(r"\s*\(\d+-\d+\)\s*$", "", raw_verdict)
     
-    findings = []
+    findings: list[dict[str, str]] = []
     for line in report.splitlines():
         m = re.match(MAGI_FINDING_RE, line)
         if m:
@@ -37,7 +37,7 @@ def _do_parse(report: str) -> dict[str, Any]:
     }
 
 
-def _queue_wrapper(queue, func, args):
+def _queue_wrapper(queue: "multiprocessing.Queue[tuple[str, Any]]", func: Callable[..., Any], args: tuple[Any, ...]) -> None:
     try:
         result = func(*args)
         queue.put(("ok", result))
@@ -45,8 +45,8 @@ def _queue_wrapper(queue, func, args):
         queue.put(("error", e))
 
 
-def run_with_regex_timeout(func: Callable, func_args: tuple, timeout: float = MAGI_PARSE_TIMEOUT):
-    result_queue = multiprocessing.Queue()
+def run_with_regex_timeout(func: Callable[..., Any], func_args: tuple[Any, ...], timeout: float = MAGI_PARSE_TIMEOUT) -> Any:
+    result_queue: multiprocessing.Queue[tuple[str, Any]] = multiprocessing.Queue()
 
     p = multiprocessing.Process(target=_queue_wrapper, args=(result_queue, func, func_args))
     p.start()
@@ -67,8 +67,9 @@ def run_with_regex_timeout(func: Callable, func_args: tuple, timeout: float = MA
     return payload
 
 
-def parse_magi_report(report: str) -> dict:
+def parse_magi_report(report: str) -> dict[str, Any]:
     try:
-        return run_with_regex_timeout(_do_parse, (report,), timeout=MAGI_PARSE_TIMEOUT)
+        result = run_with_regex_timeout(_do_parse, (report,), timeout=MAGI_PARSE_TIMEOUT)
+        return cast(dict[str, Any], result)
     except TimeoutError:
         raise ParseError("MAGI parsing timeout")

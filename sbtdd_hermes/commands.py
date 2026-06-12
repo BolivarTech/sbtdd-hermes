@@ -6,6 +6,7 @@ Handlers for slash commands:
   /sbtdd-override
 """
 
+from typing import Any
 from pathlib import Path
 
 from . import _config, prompts
@@ -19,7 +20,7 @@ from .scaffolding import (
 )
 
 
-def _make_sbtdd_handler(ctx):
+def _make_sbtdd_handler(ctx: Any) -> Any:
     def handler(args: str) -> str:
         state_path = Path(".hermes/session-state.json")
         state = load_state(state_path)
@@ -31,7 +32,7 @@ def _make_sbtdd_handler(ctx):
     return handler
 
 
-def _make_sbtdd_init_handler(ctx):
+def _make_sbtdd_init_handler(ctx: Any) -> Any:
     def handler(args: str) -> str:
         root = Path(".")
         stack = detect_stack(root)
@@ -78,7 +79,7 @@ def _make_sbtdd_init_handler(ctx):
     return handler
 
 
-def _make_sbtdd_override_handler(ctx):
+def _make_sbtdd_override_handler(ctx: Any) -> Any:
     def handler(args: str) -> str:
         import re
         state_path = Path(".hermes/session-state.json")
@@ -103,7 +104,7 @@ def _make_sbtdd_override_handler(ctx):
             return f"Error: Override limit exceeded ({state.tdd_guard_override_count}/3)."
         
         # Set override
-        override = {"tool": tool}
+        override: dict[str, Any] = {"tool": tool}
         if path:
             override["path"] = path
         if reason:
@@ -121,11 +122,11 @@ def _make_sbtdd_override_handler(ctx):
     return handler
 
 
-def _make_sbtdd_check_handler(ctx):
+def _make_sbtdd_check_handler(ctx: Any) -> Any:
     def handler(args: str) -> str:
         root = Path(".")
-        checks = []
-        warnings_list = []
+        checks: list[tuple[str, bool]] = []
+        warnings_list: list[str] = []
         
         # Check 1: HERMES.local.md exists
         hermes_exists = (root / "HERMES.local.md").exists()
@@ -146,7 +147,9 @@ def _make_sbtdd_check_handler(ctx):
         if state_exists:
             state = load_state(state_path)
             backend = state.magi_backend
-            backend_ok = backend in _config.STATE_UPDATE_FIELDS.get("magi_backend", {}).get("choices", set())
+            backend_cfg = _config.STATE_UPDATE_FIELDS.get("magi_backend", {})
+            choices = backend_cfg.get("choices", set())
+            backend_ok = backend in choices  # type: ignore[operator]
             if not backend_ok:
                 warnings_list.append(f"Invalid MAGI backend '{backend}' (expected: ollama, openrouter, claude, openai)")
         checks.append((f"MAGI backend ({backend})", backend_ok))
@@ -184,8 +187,8 @@ def _make_sbtdd_check_handler(ctx):
 
 # Tool handlers
 
-def _make_status_handler(ctx):
-    def handler(args: dict) -> dict:
+def _make_status_handler(ctx: Any) -> Any:
+    def handler(args: dict[str, Any]) -> dict[str, Any]:
         state_path = Path(".hermes/session-state.json")
         state = load_state(state_path)
         return {
@@ -198,8 +201,8 @@ def _make_status_handler(ctx):
     return handler
 
 
-def _make_update_state_handler(ctx):
-    def handler(args: dict) -> dict:
+def _make_update_state_handler(ctx: Any) -> Any:
+    def handler(args: dict[str, Any]) -> dict[str, Any]:
         from .validator import validate_full_update
         from .state import save_state, load_state
         
@@ -213,12 +216,12 @@ def _make_update_state_handler(ctx):
         if expected_revision is None:
             return {"ok": False, "error": "expected_revision is required"}
         
-        ok, msg = validate_full_update(field, value, current)
+        ok, msg = validate_full_update(str(field), value, current)
         if not ok:
             return {"ok": False, "error": msg}
         
         import dataclasses
-        new_state = dataclasses.replace(current, **{field: value})
+        new_state = dataclasses.replace(current, **{str(field): value})  # type: ignore[arg-type]
         
         try:
             save_state(state_path, new_state, expected_revision=expected_revision)
