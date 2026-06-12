@@ -4,9 +4,7 @@ TDD: sbtdd-check verifies MAGI backend configuration.
 This test MUST fail before implementation (RED phase).
 """
 
-import pytest
 from unittest.mock import MagicMock
-from pathlib import Path
 
 from sbtdd_hermes import register
 from sbtdd_hermes.state import SessionState, save_state

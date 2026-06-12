@@ -8,6 +8,7 @@ Handlers for slash commands:
 
 from pathlib import Path
 
+from . import _config, prompts
 from .state import load_state, save_state
 from .scaffolding import (
     detect_stack,
@@ -15,10 +16,7 @@ from .scaffolding import (
     merge_gitignore,
     create_directories,
     seed_spec_behavior_base,
-    scaffold_ollama_config,
 )
-from . import _config
-from .state import load_state, SessionState
 
 
 def _make_sbtdd_handler(ctx):
@@ -60,19 +58,14 @@ def _make_sbtdd_init_handler(ctx):
         # Seed spec
         spec_path = seed_spec_behavior_base(root)
         
-        # Ollama scaffolding if requested
-        ollama_msg = ""
-        if use_ollama:
-            ollama_msg = "\n- Ollama backend configured (default)"
-        
         # Summary table
         lines = [
             "# SBTDD Init Summary",
             "",
-            f"| Item | Status |",
-            f"|------|--------|",
+            "| Item | Status |",
+            "|------|--------|",
             f"| Stack detected | {stack or 'unknown'} |",
-            f"| HERMES.local.md | created |",
+            "| HERMES.local.md | created |",
             f"| MAGI backend | {backend} |",
             f"| .gitignore entries | {len(added)} added, {len(present)} already present |",
             f"| Directories | {', '.join(dirs) or 'all exist'} |",

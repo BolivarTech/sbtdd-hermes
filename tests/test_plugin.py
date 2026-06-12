@@ -1,6 +1,5 @@
 """Tests for sbtdd_hermes.plugin registration."""
 
-import pytest
 from unittest.mock import MagicMock
 
 from sbtdd_hermes import register

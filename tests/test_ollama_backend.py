@@ -8,7 +8,7 @@ import pytest
 from unittest.mock import MagicMock
 
 from sbtdd_hermes import register
-from sbtdd_hermes.state import SessionState, load_state
+from sbtdd_hermes.state import SessionState
 
 
 class TestOllamaBackendInStatus:

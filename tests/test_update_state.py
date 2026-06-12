@@ -4,9 +4,7 @@ TDD: sbtdd_update_state robustness.
 This test MUST fail before implementation (RED phase).
 """
 
-import pytest
 from unittest.mock import MagicMock
-from pathlib import Path
 
 from sbtdd_hermes import register
 from sbtdd_hermes.state import SessionState, load_state, save_state

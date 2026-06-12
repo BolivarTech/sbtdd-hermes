@@ -4,7 +4,6 @@ TDD: README v2.0.0 plugin documentation.
 This test MUST fail before implementation (RED phase).
 """
 
-import pytest
 from pathlib import Path
 
 

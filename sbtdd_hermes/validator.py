@@ -1,5 +1,4 @@
 import dataclasses
-from typing import Callable
 
 from ._config import (
     PHASE_TRANSITIONS,
@@ -24,7 +23,7 @@ def validate_update_field(field: str, value, current_state: SessionState) -> tup
         return False, f"Value above maximum {spec['max']}"
 
     if "choices" in spec and value not in spec["choices"]:
-        return False, f"Value not in allowed choices"
+        return False, "Value not in allowed choices"
 
     if spec.get("validate") == "phase_transition":
         old = current_state.current_phase
@@ -33,7 +32,7 @@ def validate_update_field(field: str, value, current_state: SessionState) -> tup
             return False, f"Invalid transition: {old} -> {value}. Allowed: {allowed}"
 
     if "max_length" in spec and len(value) > spec["max_length"]:
-        return False, f"String exceeds max length"
+        return False, "String exceeds max length"
 
     return True, ""
 

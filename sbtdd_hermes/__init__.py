@@ -5,7 +5,6 @@ Entry point: register(ctx)
 
 import dataclasses
 import re
-import time
 from pathlib import Path
 
 from . import _config

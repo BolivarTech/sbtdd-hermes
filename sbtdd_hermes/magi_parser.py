@@ -1,15 +1,15 @@
 import multiprocessing
 import re
-from typing import Callable
+from typing import Callable, Any
 
-from ._config import MAGI_PARSE_TIMEOUT, MAGI_BANNER_RE, MAGI_VEREDICTO_RE, MAGI_FINDING_RE
+from ._config import MAGI_PARSE_TIMEOUT, MAGI_VEREDICTO_RE, MAGI_FINDING_RE
 
 
 class ParseError(RuntimeError):
     pass
 
 
-def _do_parse(report: str) -> dict:
+def _do_parse(report: str) -> dict[str, Any]:
     if "+==================================================+" not in report:
         raise ParseError("Missing MAGI banner")
     if "CONSENSUS:" not in report:

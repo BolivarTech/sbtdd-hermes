@@ -1,6 +1,5 @@
 """Tests for sbtdd_hermes.validator module."""
 
-import pytest
 
 from sbtdd_hermes.validator import (
     validate_update_field,

@@ -2,8 +2,6 @@
 
 import json
 import pytest
-from pathlib import Path
-from dataclasses import dataclass
 
 from sbtdd_hermes.state import (
     SessionState,
@@ -11,7 +9,6 @@ from sbtdd_hermes.state import (
     save_state,
     migrate_state,
     ConcurrencyError,
-    SaveError,
     MigrationError,
 )
 

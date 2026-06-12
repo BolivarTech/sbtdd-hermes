@@ -2,7 +2,6 @@
 Commit message helper.
 """
 
-import sys
 
 # Commit prefixes by phase
 COMMIT_PREFIXES = {

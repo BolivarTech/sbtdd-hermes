@@ -3,6 +3,7 @@ import os
 import warnings
 from dataclasses import dataclass, field, asdict
 from pathlib import Path
+from typing import Any
 
 import filelock
 
@@ -41,12 +42,12 @@ class SessionState:
     magi_iterations_used: int = 0
     magi_backend: str = "ollama"
     magi_target_verdict: str | None = None
-    tdd_guard_override: dict = field(default_factory=dict)
+    tdd_guard_override: dict[str, Any] = field(default_factory=dict)
     tdd_guard_override_count: int = 0
     last_override_reason: str = ""
     notes: str = ""
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, Any]:
         return asdict(self)
 
     @classmethod

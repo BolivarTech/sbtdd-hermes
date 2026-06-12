@@ -4,12 +4,9 @@ TDD: TDD-Guard override limit enforcement.
 This test MUST fail before implementation (RED phase).
 """
 
-import json
-import pytest
-from unittest.mock import MagicMock, patch
-from pathlib import Path
+from unittest.mock import patch
 
-from sbtdd_hermes import register, _on_pre_tool_call
+from sbtdd_hermes import _on_pre_tool_call
 from sbtdd_hermes.state import SessionState, save_state
 from sbtdd_hermes._config import MAX_OVERRIDE_PER_SESSION
 

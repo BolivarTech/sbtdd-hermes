@@ -1,8 +1,6 @@
 """Tests for sbtdd_hermes concurrency (OCC + filelock)."""
 
-import threading
 import time
-from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor
 
 import pytest

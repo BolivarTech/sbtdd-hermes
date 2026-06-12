@@ -4,7 +4,6 @@ Git status analyzer.
 
 import json
 import subprocess
-import sys
 
 
 def check_git_status() -> dict:

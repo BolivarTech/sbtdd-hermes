@@ -1,7 +1,6 @@
 """Tests for sbtdd_hermes.scripts module."""
 
 import json
-from pathlib import Path
 
 from sbtdd_hermes.scripts.verify import run_with_error_handling, run_verification
 from sbtdd_hermes.scripts.git_status import check_git_status

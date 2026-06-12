@@ -56,7 +56,7 @@ def render_hermes_local_md(stack: str | None, author: str | None = None, error_t
         lines.extend([
             "## 4. Project Stack",
             f"- Language: {stack}",
-            f"- Test runner: see verification commands",
+            "- Test runner: see verification commands",
             "- TDD-Guard: implemented via native SBTDD plugin (`pre_tool_call` hook)",
             "",
         ])
@@ -73,7 +73,7 @@ def render_hermes_local_md(stack: str | None, author: str | None = None, error_t
     
     if error_type:
         lines.extend([
-            f"## 0.2 Error Handling",
+            "## 0.2 Error Handling",
             f"- Use `{error_type}` for domain errors",
             "",
         ])

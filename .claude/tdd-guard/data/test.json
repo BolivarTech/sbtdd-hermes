@@ -131,6 +131,111 @@
       ]
     },
     {
+      "moduleId": "tests/test_readme.py",
+      "tests": [
+        {
+          "name": "test_readme_exists",
+          "fullName": "tests/test_readme.py::TestReadmeV200::test_readme_exists",
+          "state": "passed"
+        },
+        {
+          "name": "test_readme_mentions_plugin_not_skill",
+          "fullName": "tests/test_readme.py::TestReadmeV200::test_readme_mentions_plugin_not_skill",
+          "state": "passed"
+        },
+        {
+          "name": "test_readme_documents_commands",
+          "fullName": "tests/test_readme.py::TestReadmeV200::test_readme_documents_commands",
+          "state": "passed"
+        },
+        {
+          "name": "test_readme_documents_tools",
+          "fullName": "tests/test_readme.py::TestReadmeV200::test_readme_documents_tools",
+          "state": "passed"
+        },
+        {
+          "name": "test_readme_has_installation_section",
+          "fullName": "tests/test_readme.py::TestReadmeV200::test_readme_has_installation_section",
+          "state": "passed"
+        },
+        {
+          "name": "test_readme_has_version_200",
+          "fullName": "tests/test_readme.py::TestReadmeV200::test_readme_has_version_200",
+          "state": "passed"
+        },
+        {
+          "name": "test_readme_documents_hooks",
+          "fullName": "tests/test_readme.py::TestReadmeV200::test_readme_documents_hooks",
+          "state": "passed"
+        }
+      ]
+    },
+    {
+      "moduleId": "tests/test_sbtdd_check_backend.py",
+      "tests": [
+        {
+          "name": "test_check_reports_magi_backend",
+          "fullName": "tests/test_sbtdd_check_backend.py::TestSBTDDCheckBackend::test_check_reports_magi_backend",
+          "state": "passed"
+        },
+        {
+          "name": "test_check_warns_on_unsupported_backend",
+          "fullName": "tests/test_sbtdd_check_backend.py::TestSBTDDCheckBackend::test_check_warns_on_unsupported_backend",
+          "state": "passed"
+        }
+      ]
+    },
+    {
+      "moduleId": "tests/test_sbtdd_override.py",
+      "tests": [
+        {
+          "name": "test_override_command_is_registered",
+          "fullName": "tests/test_sbtdd_override.py::TestSBTDDOverrideCommand::test_override_command_is_registered",
+          "state": "passed"
+        },
+        {
+          "name": "test_override_sets_tdd_guard_override",
+          "fullName": "tests/test_sbtdd_override.py::TestSBTDDOverrideCommand::test_override_sets_tdd_guard_override",
+          "state": "passed"
+        },
+        {
+          "name": "test_override_requires_tool_argument",
+          "fullName": "tests/test_sbtdd_override.py::TestSBTDDOverrideCommand::test_override_requires_tool_argument",
+          "state": "passed"
+        },
+        {
+          "name": "test_override_increments_count",
+          "fullName": "tests/test_sbtdd_override.py::TestSBTDDOverrideCommand::test_override_increments_count",
+          "state": "passed"
+        }
+      ]
+    },
+    {
+      "moduleId": "tests/test_sbtdd_status.py",
+      "tests": [
+        {
+          "name": "test_status_schema_has_properties",
+          "fullName": "tests/test_sbtdd_status.py::TestSBTDDStatusTool::test_status_schema_has_properties",
+          "state": "passed"
+        },
+        {
+          "name": "test_status_schema_declares_all_fields",
+          "fullName": "tests/test_sbtdd_status.py::TestSBTDDStatusTool::test_status_schema_declares_all_fields",
+          "state": "passed"
+        },
+        {
+          "name": "test_status_response_includes_all_fields",
+          "fullName": "tests/test_sbtdd_status.py::TestSBTDDStatusTool::test_status_response_includes_all_fields",
+          "state": "passed"
+        },
+        {
+          "name": "test_status_response_with_defaults",
+          "fullName": "tests/test_sbtdd_status.py::TestSBTDDStatusTool::test_status_response_with_defaults",
+          "state": "passed"
+        }
+      ]
+    },
+    {
       "moduleId": "tests/test_scripts.py",
       "tests": [
         {
@@ -376,6 +481,31 @@
       ]
     },
     {
+      "moduleId": "tests/test_tdd_guard_limit.py",
+      "tests": [
+        {
+          "name": "test_override_count_increments_on_use",
+          "fullName": "tests/test_tdd_guard_limit.py::TestTDDGuardOverrideLimit::test_override_count_increments_on_use",
+          "state": "passed"
+        },
+        {
+          "name": "test_override_blocked_when_limit_reached",
+          "fullName": "tests/test_tdd_guard_limit.py::TestTDDGuardOverrideLimit::test_override_blocked_when_limit_reached",
+          "state": "passed"
+        },
+        {
+          "name": "test_override_allowed_before_limit",
+          "fullName": "tests/test_tdd_guard_limit.py::TestTDDGuardOverrideLimit::test_override_allowed_before_limit",
+          "state": "passed"
+        },
+        {
+          "name": "test_override_without_state_file_not_blocked",
+          "fullName": "tests/test_tdd_guard_limit.py::TestTDDGuardOverrideLimit::test_override_without_state_file_not_blocked",
+          "state": "passed"
+        }
+      ]
+    },
+    {
       "moduleId": "tests/test_templates.py",
       "tests": [
         {
@@ -406,6 +536,31 @@
         {
           "name": "test_verification_cpp_present",
           "fullName": "tests/test_templates.py::test_verification_cpp_present",
+          "state": "passed"
+        }
+      ]
+    },
+    {
+      "moduleId": "tests/test_update_state.py",
+      "tests": [
+        {
+          "name": "test_update_state_creates_new_when_missing",
+          "fullName": "tests/test_update_state.py::TestSBTDDUpdateStateRobustness::test_update_state_creates_new_when_missing",
+          "state": "passed"
+        },
+        {
+          "name": "test_update_state_requires_expected_revision",
+          "fullName": "tests/test_update_state.py::TestSBTDDUpdateStateRobustness::test_update_state_requires_expected_revision",
+          "state": "passed"
+        },
+        {
+          "name": "test_update_state_applies_valid_field",
+          "fullName": "tests/test_update_state.py::TestSBTDDUpdateStateRobustness::test_update_state_applies_valid_field",
+          "state": "passed"
+        },
+        {
+          "name": "test_update_state_rejects_invalid_value",
+          "fullName": "tests/test_update_state.py::TestSBTDDUpdateStateRobustness::test_update_state_rejects_invalid_value",
           "state": "passed"
         }
       ]
