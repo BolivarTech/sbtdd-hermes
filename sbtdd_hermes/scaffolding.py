@@ -21,13 +21,16 @@ GITIGNORE_ENTRIES = [
 
 
 def detect_stack(root: Path) -> str | None:
-    """Detect project stack by manifest files."""
-    for stack, manifests in STACK_MANIFESTS.items():
-        if isinstance(manifests, str):
-            manifests = (manifests,)
-        for manifest in manifests:
-            if (root / manifest).exists():
-                return stack
+    """Detect project stack by manifest files, searching upward from root."""
+    current = root.resolve()
+    while current != current.parent:
+        for stack, manifests in STACK_MANIFESTS.items():
+            if isinstance(manifests, str):
+                manifests = (manifests,)
+            for manifest in manifests:
+                if (current / manifest).exists():
+                    return stack
+        current = current.parent
     return None
 
 
