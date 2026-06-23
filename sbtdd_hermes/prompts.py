@@ -159,46 +159,35 @@ def build_brainstorm_prompt(root: Path) -> str:
 
     open_fence, close_fence = _compute_fence(content)
 
-    return f"""# SBTDD Workflow
+    # Build a minimal, imperative directive — NOT a content-rich markdown prompt.
+    # The model must see this as an instruction to act, not as content to display.
+    return f"""[DIRECTIVE] SBTDD Phase: specification_brainstorm
 
-**Phase: Specification (Brainstorm)**
+You MUST call write_file NOW. Do not discuss, do not preview.
 
-The base spec is ready. Your task is to generate `sbtdd/spec-behavior.md` by refining and expanding `sbtdd/spec-behavior-base.md`.
+Path: sbtdd/spec-behavior.md
+Task: Refine the base spec below into a full spec-behavior.md with these sections:
+- Objective (one sentence)
+- Requirements (SDD): numbered SHALL statements
+- Scenarios (BDD): Given/When/Then blocks
+- Constraints: measurable limits
+- Non-goals: out of scope
 
-## Input — spec-behavior-base.md
+Rules:
+- Atomic BDD scenarios (one per behavior)
+- Every requirement traceable to at least one scenario
+- Measurable constraints (e.g., "< 200 ms", not "fast")
+- NO template markers (<feature-name>, <!-- replace:)
+- Do NOT include these instructions in the file content
+
+Base spec follows (read it, then write the refined version):
 
 {open_fence}
 {content}
 {close_fence}
 {truncation_notice}
 
-## Action Required
-
-**DO NOT** print or discuss the spec. Instead:
-
-1. **Read** the base spec above carefully.
-2. **Generate** the refined `sbtdd/spec-behavior.md` content internally.
-3. **Call `write_file`** immediately with:
-   - path: `sbtdd/spec-behavior.md`
-   - content: the full refined spec (Objective, SDD Requirements, BDD Scenarios, Constraints, Non-goals)
-4. **Verify** the file exists and contains no template markers (`<feature-name>`, `<!-- replace:`).
-
-## Structure for the output file
-- **Objective** — clear one-sentence feature description
-- **Requirements (SDD)** — SHALL statements, numbered, unambiguous
-- **Scenarios (BDD)** — Given / When / Then blocks for each acceptance test
-- **Constraints** — technical, performance, compatibility limits
-- **Non-goals** — explicitly out of scope to prevent creep
-
-## Rules
-- Expand each bullet into concrete, testable statements.
-- BDD scenarios must be atomic (one scenario per behavior).
-- Every requirement MUST be traceable to at least one scenario.
-- Constraints MUST be measurable (e.g., "response time < 200 ms" not "fast").
-- Do NOT include the instructions above in the file content.
-
-After calling `write_file`, confirm the file was written successfully.
-Then run `/sbtdd` to proceed to planning.
+What is your next action? (Expected: call write_file)
 """
 
 
