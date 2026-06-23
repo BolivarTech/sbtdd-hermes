@@ -36,7 +36,15 @@ def _make_sbtdd_handler(ctx: Any) -> Any:
             )
 
         if phase == "specification_brainstorm":
-            return build_brainstorm_prompt(root)
+            return (
+                "Phase: Specification (Brainstorm)\n\n"
+                "The spec base is ready at `sbtdd/spec-behavior-base.md`.\n\n"
+                "ACTION REQUIRED: Tell the agent to refine it. For example:\n"
+                "  'Read sbtdd/spec-behavior-base.md and write a refined spec to sbtdd/spec-behavior.md'\n\n"
+                "The refined spec must have: Objective, Requirements (SDD), "
+                "Scenarios (BDD), Constraints, Non-goals.\n\n"
+                "After the file is written, run `/sbtdd` to proceed to planning."
+            )
 
         if phase == "planning":
             return (

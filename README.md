@@ -261,34 +261,80 @@ hermes config set sbtdd.strict false
 
 ## Usage
 
+### The SBTDD Workflow
+
+SBTDD is a **five-phase** workflow. Some phases are fully automated by the plugin; others require a **manual instruction** to the agent because Hermes slash commands cannot force the model to execute tools.
+
+| Phase | How to advance | What happens |
+|---|---|---|
+| **1. Specification (Base)** | `/sbtdd-init` | Plugin scaffolds `sbtdd/spec-behavior-base.md` |
+| **2. Specification (Refine)** | **You tell the agent** | You write: "Read `sbtdd/spec-behavior-base.md` and write refined spec to `sbtdd/spec-behavior.md`" — the agent uses `read_file` + `write_file` |
+| **3. Planning** | `/sbtdd` | Plugin prompts you to create a plan |
+| **4. Plan Gate (MAGI)** | `/sbtdd` | Plugin guides you through MAGI review |
+| **5. TDD Execution** | `/sbtdd` | Plugin automatically enforces Red → Green → Refactor via `pre_tool_call` hook |
+
 ### Slash commands
 
 ```bash
-/sbtdd                        # Show current TDD phase instructions
+/sbtdd                        # Show current phase instructions
 /sbtdd-init                  # Initialize project scaffolding
 /sbtdd-init --ollama         # Initialize with Ollama MAGI backend
 /sbtdd-check                 # Verify project setup and state
 /sbtdd-override --tool write_file --path src/foo.py  # TDD-Guard override
 ```
 
-### Tool invocation (LLM-driven)
+### Phase-by-phase guide
 
-The LLM can call SBTDD tools programmatically:
+#### Phase 1: Initialize
 
-- **`sbtdd_status`** — Query current phase, task, and MAGI budget
-- **`sbtdd_update_state`** — Mutate state atomically (requires `expected_revision` for OCC)
+```bash
+/sbtdd-init
+```
 
-### TDD-Guard behavior
+This creates:
+- `sbtdd/` directory with `spec-behavior-base.md`
+- `planning/` directory
+- `.hermes/session-state.json`
+- `HERMES.local.md`
 
-The `pre_tool_call` hook automatically intercepts writes during TDD phases:
+#### Phase 2: Write spec (manual instruction required)
 
-| Phase | Blocked | Allowed |
-|-------|---------|---------|
-| **Red** | Production code (`write_file`, `patch`) | Test files, reads, tools |
-| **Green** | Test modifications | Production code |
-| **Refactor** | Nothing (warning: "no new features") | Everything |
+**The plugin CANNOT automatically write the spec for you.** Tell the agent:
 
-Use `/sbtdd-override` to bypass with an audited override budget.
+> "Read `sbtdd/spec-behavior-base.md` and write a refined specification to `sbtdd/spec-behavior.md`. Include Objective, SDD Requirements, BDD Scenarios, Constraints, and Non-goals."
+
+The agent will use `read_file` and `write_file` — this works because it's a **normal conversation instruction**, not a slash command.
+
+After the file is written, run `/sbtdd` to proceed.
+
+#### Phase 3: Planning
+
+```bash
+/sbtdd
+```
+
+The plugin will tell you to create a plan. Use the planning skill or write it manually to `planning/hermes-plan-tdd.md`.
+
+#### Phase 4: Plan Gate (MAGI Review)
+
+```bash
+/sbtdd
+```
+
+The plugin will guide you through MAGI review of the plan. Use `/skill magi` or the MAGI plugin.
+
+#### Phase 5: TDD Execution (fully automated)
+
+```bash
+/sbtdd
+```
+
+The plugin automatically manages Red → Green → Refactor phases:
+- **Red**: Only test files allowed
+- **Green**: Only production code allowed  
+- **Refactor**: Everything allowed, but warns about new features
+
+The `pre_tool_call` hook blocks violations automatically.
 
 ---
 
