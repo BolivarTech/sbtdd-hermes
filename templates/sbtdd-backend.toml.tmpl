@@ -1,0 +1,25 @@
+# SBTDD Backend Configuration
+# Precedence (per key): env > this file (repo) > ~/.hermes/sbtdd-backend.toml > built-in
+#
+# This configures an OpenAI-compatible backend (Ollama, OpenRouter, etc.)
+# for automated SBTDD phases that the main Hermes model cannot handle.
+#
+# SECURITY: api_key is read from env var SBTDD_BACKEND_API_KEY only.
+# Do NOT write real keys here — this file may be committed.
+
+# OpenAI-compatible base URL.
+base_url = "http://localhost:11434/v1"
+
+[phases]
+# Per-phase model selection. The backend receives the phase name
+# and uses the corresponding model for generation.
+#
+# Recommendation:
+#   - thinking models (deepseek-r1, qwen-thinking) for brainstorming/planning
+#   - coding models (qwen-coder, claude-sonnet) for red/green/refactor
+
+brainstorm = "deepseek-r1:32b"
+planning   = "qwen3.5:397b-cloud"
+red        = "qwen2.5-coder:32b"
+green      = "qwen2.5-coder:32b"
+refactor   = "qwen2.5-coder:32b"

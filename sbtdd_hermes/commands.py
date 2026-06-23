@@ -22,6 +22,9 @@ from .scaffolding import (
 from .prompts import build_brainstorm_prompt
 
 
+from sbtdd_hermes.backend_client import generate_with_backend, BackendUnavailableError
+
+
 def _make_sbtdd_handler(ctx: Any) -> Any:
     def handler(args: str) -> str:
         root = Path(".")
@@ -36,15 +39,46 @@ def _make_sbtdd_handler(ctx: Any) -> Any:
             )
 
         if phase == "specification_brainstorm":
-            return (
-                "Phase: Specification (Brainstorm)\n\n"
-                "The spec base is ready at `sbtdd/spec-behavior-base.md`.\n\n"
-                "ACTION REQUIRED: Tell the agent to refine it. For example:\n"
-                "  'Read sbtdd/spec-behavior-base.md and write a refined spec to sbtdd/spec-behavior.md'\n\n"
-                "The refined spec must have: Objective, Requirements (SDD), "
-                "Scenarios (BDD), Constraints, Non-goals.\n\n"
-                "After the file is written, run `/sbtdd` to proceed to planning."
-            )
+            spec_base_path = root / "sbtdd" / "spec-behavior-base.md"
+            spec_output_path = root / "sbtdd" / "spec-behavior.md"
+
+            if not spec_base_path.exists():
+                return (
+                    "Error: `sbtdd/spec-behavior-base.md` not found. "
+                    "Run `/sbtdd-init` first."
+                )
+
+            try:
+                content = spec_base_path.read_text(encoding="utf-8")
+                result = generate_with_backend(
+                    phase="brainstorm",
+                    content=content,
+                    output_path=spec_output_path,
+                )
+                return (
+                    f"# SBTDD Workflow\n\n"
+                    f"**Phase: Specification (Brainstorm)**\n\n"
+                    f"✅ {result}\n\n"
+                    f"Next: Review the spec, then run `/sbtdd` to proceed to planning."
+                )
+            except BackendUnavailableError as exc:
+                return (
+                    f"# SBTDD Workflow\n\n"
+                    f"**Phase: Specification (Brainstorm)**\n\n"
+                    f"⚠️ Backend unavailable: {exc}\n\n"
+                    f"FALLBACK: Tell the agent to refine the spec manually:\n"
+                    f"  'Read sbtdd/spec-behavior-base.md and write a refined spec to sbtdd/spec-behavior.md'\n\n"
+                    f"After writing the file, run `/sbtdd` to proceed."
+                )
+            except Exception as exc:
+                return (
+                    f"# SBTDD Workflow\n\n"
+                    f"**Phase: Specification (Brainstorm)**\n\n"
+                    f"⚠️ Backend error: {exc}\n\n"
+                    f"FALLBACK: Tell the agent to refine the spec manually:\n"
+                    f"  'Read sbtdd/spec-behavior-base.md and write a refined spec to sbtdd/spec-behavior.md'\n\n"
+                    f"After writing the file, run `/sbtdd` to proceed."
+                )
 
         if phase == "planning":
             return (
@@ -190,6 +224,13 @@ def _make_sbtdd_init_handler(ctx: Any) -> Any:
         state_path = root / ".hermes" / "session-state.json"
         state = SessionState(magi_backend=backend, stack=stack)
         state_path.write_text(json.dumps(state.to_dict(), indent=2), encoding="utf-8")
+
+        # Scaffold backend config if not exists
+        backend_cfg_path = root / ".hermes" / "sbtdd-backend.toml"
+        if not backend_cfg_path.exists():
+            tmpl = Path(__file__).parent / "templates" / "sbtdd-backend.toml.tmpl"
+            if tmpl.exists():
+                backend_cfg_path.write_text(tmpl.read_text(encoding="utf-8"), encoding="utf-8")
 
         # Summary table
         lines = [
