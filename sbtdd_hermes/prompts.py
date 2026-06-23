@@ -117,78 +117,39 @@ def _compute_fence(content: str) -> tuple[str, str]:
 
 
 def build_brainstorm_prompt(root: Path) -> str:
-    """Generate an active brainstorm prompt from spec-behavior-base.md.
+    """Generate a SHORT directive for the brainstorm phase.
 
-    Reads the spec base, truncates if it exceeds _MAX_SPEC_BYTES, detects
-    the longest run of backticks in the content, and wraps it in a markdown
-    fenced code block whose fence cannot be prematurely closed by any line
-    in the content (per CommonMark spec §4.5).
-    Returns a full prompt instructing the agent to write sbtdd/spec-behavior.md.
+    The key insight: do NOT embed the spec content in the prompt.
+    A huge wall of text triggers the model's "present/discuss" mode.
+    A short directive triggers the model's "execute" mode.
+    The model will use read_file to read the spec, then write_file to write it.
     """
     spec_base = root / "sbtdd" / "spec-behavior-base.md"
 
     if not spec_base.exists():
         return (
-            "# SBTDD Workflow\n\n"
-            "**Phase: Specification (Brainstorm)**\n\n"
-            "⚠️ Error: `sbtdd/spec-behavior-base.md` was not found. "
+            "Error: `sbtdd/spec-behavior-base.md` not found. "
             "Run `/sbtdd-init` to scaffold it, then fill it in before proceeding."
         )
 
-    try:
-        actual_size = spec_base.stat().st_size
-        with spec_base.open("rb") as f:
-            raw = f.read(_MAX_SPEC_BYTES + 1)
-        was_truncated = len(raw) > _MAX_SPEC_BYTES
-        content = raw[:_MAX_SPEC_BYTES].decode("utf-8", errors="replace")
-        if was_truncated:
-            truncation_notice = (
-                "\n\n⚠️ **Note:** spec-behavior-base.md exceeds safe size limit "
-                f"({actual_size} bytes > {_MAX_SPEC_BYTES}). Content was truncated. "
-                "Review and split into smaller specs if needed."
-            )
-        else:
-            truncation_notice = ""
-    except OSError as e:
-        return (
-            "# SBTDD Workflow\n\n"
-            "**Phase: Specification (Brainstorm)**\n\n"
-            f"⚠️ Error reading spec-behavior-base.md: {e}. "
-            "Check file permissions and encoding, then run `/sbtdd` again."
-        )
-
-    open_fence, close_fence = _compute_fence(content)
-
-    # Build a minimal, imperative directive — NOT a content-rich markdown prompt.
-    # The model must see this as an instruction to act, not as content to display.
-    return f"""[DIRECTIVE] SBTDD Phase: specification_brainstorm
-
-You MUST call write_file NOW. Do not discuss, do not preview.
-
-Path: sbtdd/spec-behavior.md
-Task: Refine the base spec below into a full spec-behavior.md with these sections:
-- Objective (one sentence)
-- Requirements (SDD): numbered SHALL statements
-- Scenarios (BDD): Given/When/Then blocks
-- Constraints: measurable limits
-- Non-goals: out of scope
-
-Rules:
-- Atomic BDD scenarios (one per behavior)
-- Every requirement traceable to at least one scenario
-- Measurable constraints (e.g., "< 200 ms", not "fast")
-- NO template markers (<feature-name>, <!-- replace:)
-- Do NOT include these instructions in the file content
-
-Base spec follows (read it, then write the refined version):
-
-{open_fence}
-{content}
-{close_fence}
-{truncation_notice}
-
-What is your next action? (Expected: call write_file)
-"""
+    # Short imperative directive. No embedded content. No markdown structure.
+    return (
+        "Read `sbtdd/spec-behavior-base.md`, refine it into a full spec, "
+        "and write the result to `sbtdd/spec-behavior.md`. "
+        "The refined spec must have these sections:\n"
+        "- Objective (one sentence)\n"
+        "- Requirements (SDD): numbered SHALL statements\n"
+        "- Scenarios (BDD): Given/When/Then blocks\n"
+        "- Constraints: measurable limits\n"
+        "- Non-goals: explicitly out of scope\n\n"
+        "Rules:\n"
+        "- Atomic BDD scenarios (one per behavior)\n"
+        "- Every requirement traceable to at least one scenario\n"
+        "- Measurable constraints (e.g., '< 200 ms', not 'fast')\n"
+        "- NO template markers (<feature-name>, <!-- replace:)\n"
+        "- Do NOT include these instructions in the output file\n\n"
+        "After writing the file, confirm it exists and run `/sbtdd`."
+    )
 
 
 def build_verification_prompt(stack: str) -> str:
