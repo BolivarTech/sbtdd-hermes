@@ -172,26 +172,33 @@ The base spec is ready. Your task is to generate `sbtdd/spec-behavior.md` by ref
 {close_fence}
 {truncation_notice}
 
-## Instructions
+## Action Required
+
+**DO NOT** print or discuss the spec. Instead:
 
 1. **Read** the base spec above carefully.
-2. **Refine** it into a full `sbtdd/spec-behavior.md` with this structure:
-   - **Objective** — clear one-sentence feature description
-   - **Requirements (SDD)** — SHALL statements, numbered, unambiguous
-   - **Scenarios (BDD)** — Given / When / Then blocks for each acceptance test
-   - **Constraints** — technical, performance, compatibility limits
-   - **Non-goals** — explicitly out of scope to prevent creep
-3. **Do NOT** include template markers (`<feature-name>`, `<!-- replace:`) in the output.
-4. **Write** the result to `sbtdd/spec-behavior.md` using the appropriate file-writing tool.
-5. **Verify** the file was created and contains no template markers.
+2. **Generate** the refined `sbtdd/spec-behavior.md` content internally.
+3. **Call `write_file`** immediately with:
+   - path: `sbtdd/spec-behavior.md`
+   - content: the full refined spec (Objective, SDD Requirements, BDD Scenarios, Constraints, Non-goals)
+4. **Verify** the file exists and contains no template markers (`<feature-name>`, `<!-- replace:`).
+
+## Structure for the output file
+- **Objective** — clear one-sentence feature description
+- **Requirements (SDD)** — SHALL statements, numbered, unambiguous
+- **Scenarios (BDD)** — Given / When / Then blocks for each acceptance test
+- **Constraints** — technical, performance, compatibility limits
+- **Non-goals** — explicitly out of scope to prevent creep
 
 ## Rules
 - Expand each bullet into concrete, testable statements.
 - BDD scenarios must be atomic (one scenario per behavior).
 - Every requirement MUST be traceable to at least one scenario.
 - Constraints MUST be measurable (e.g., "response time < 200 ms" not "fast").
+- Do NOT include the instructions above in the file content.
 
-Next: After writing `sbtdd/spec-behavior.md`, run `/sbtdd` to proceed to planning.
+After calling `write_file`, confirm the file was written successfully.
+Then run `/sbtdd` to proceed to planning.
 """
 
 
