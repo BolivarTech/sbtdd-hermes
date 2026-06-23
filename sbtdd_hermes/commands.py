@@ -8,9 +8,10 @@ Handlers for slash commands:
 
 from typing import Any
 from pathlib import Path
+import json
 
 from . import _config, prompts
-from .state import load_state, save_state
+from .state import load_state, save_state, SessionState
 from .scaffolding import (
     detect_stack,
     render_hermes_local_md,
@@ -37,8 +38,8 @@ def _make_sbtdd_init_handler(ctx: Any) -> Any:
         root = Path(".")
         stack = detect_stack(root)
         
-        # Parse --ollama flag
-        use_ollama = "--ollama" in args.split() if args else False
+        # Parse --ollama-init flag (per spec)
+        use_ollama = "--ollama-init" in args.split() if args else False
         
         # Generate HERMES.local.md with Ollama backend if requested
         backend = "ollama" if use_ollama else "ollama"  # default to ollama
@@ -59,6 +60,11 @@ def _make_sbtdd_init_handler(ctx: Any) -> Any:
         # Seed spec
         spec_path = seed_spec_behavior_base(root)
         
+        # Create session state file
+        state_path = root / ".hermes" / "session-state.json"
+        state = SessionState(magi_backend=backend, stack=stack)
+        state_path.write_text(json.dumps(state.to_dict(), indent=2), encoding="utf-8")
+        
         # Summary table
         lines = [
             "# SBTDD Init Summary",
@@ -71,6 +77,7 @@ def _make_sbtdd_init_handler(ctx: Any) -> Any:
             f"| .gitignore entries | {len(added)} added, {len(present)} already present |",
             f"| Directories | {', '.join(dirs) or 'all exist'} |",
             f"| Spec base | {spec_path} |",
+            f"| Session state | {state_path} |",
             f"| Ollama | {'enabled' if use_ollama else 'default'} |",
             "",
             "Next: Edit `sbtdd/spec-behavior-base.md` then run `/sbtdd` to begin.",
@@ -144,9 +151,11 @@ def _make_sbtdd_check_handler(ctx: Any) -> Any:
         # Check 4: MAGI backend config
         backend = "unknown"
         backend_ok = False
+        stack = None
         if state_exists:
             state = load_state(state_path)
             backend = state.magi_backend
+            stack = state.stack
             backend_cfg = _config.STATE_UPDATE_FIELDS.get("magi_backend", {})
             choices = backend_cfg.get("choices", set())
             backend_ok = backend in choices  # type: ignore[operator]
@@ -155,8 +164,9 @@ def _make_sbtdd_check_handler(ctx: Any) -> Any:
         checks.append((f"MAGI backend ({backend})", backend_ok))
         
         # Check 5: Stack detected
-        stack = detect_stack(root)
-        checks.append(("Stack detected", bool(stack)))
+        if stack is None:
+            stack = detect_stack(root)
+        checks.append((f"Stack detected ({stack or 'none'})", bool(stack)))
         
         # Check 6: Git repo initialized
         git_exists = (root / ".git").exists()

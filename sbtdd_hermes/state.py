@@ -87,6 +87,7 @@ class SessionState:
     magi_iterations_used: int = 0
     magi_backend: str = "ollama"
     magi_target_verdict: str | None = None
+    stack: str | None = None
     tdd_guard_override: dict[str, Any] = field(default_factory=dict)
     tdd_guard_override_count: int = 0
     last_override_reason: str = ""
