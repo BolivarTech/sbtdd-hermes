@@ -15,6 +15,7 @@ from ._config import (
 # Optional filelock — Hermes stripped venv may not have it
 try:
     import filelock
+
     _HAS_FILELOCK = True
 except ImportError:
     _HAS_FILELOCK = False
@@ -22,11 +23,13 @@ except ImportError:
 
 class _FallbackFileLock:
     """Cross-platform file lock fallback when filelock is unavailable."""
+
     def __init__(self, lock_path: str) -> None:
         self.lock_path = Path(lock_path)
 
     def acquire(self, timeout: float = -1) -> None:
         import time
+
         start = time.time()
         while True:
             try:
@@ -168,6 +171,7 @@ def save_state(path: Path, state: SessionState, expected_revision: int) -> None:
         except Exception as e:
             if attempt < len(FILELOCK_RETRY_DELAYS) - 1:
                 import time
+
                 time.sleep(delay)
             else:
                 raise SaveError(

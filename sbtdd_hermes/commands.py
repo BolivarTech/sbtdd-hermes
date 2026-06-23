@@ -122,6 +122,12 @@ def _determine_phase(root: Path) -> tuple[str, str | None]:
             state = load_state(state_path)
             if state.current_phase == "done":
                 return "pre_merge", ("All tasks complete. Proceed to pre-merge review.")
+            # Validate phase is a known execution phase
+            if state.current_phase not in {"red", "green", "refactor"}:
+                return "red", (
+                    f"Invalid phase '{state.current_phase}' in state. "
+                    "Resetting to red. Run `/sbtdd` to continue."
+                )
             return state.current_phase, None
         else:
             # No state file but approved plan exists -> start execution at red
