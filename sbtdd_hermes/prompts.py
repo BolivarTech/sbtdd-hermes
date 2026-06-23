@@ -3,9 +3,15 @@ Prompt generators for the agent.
 Builds structured prompts/instructions based on current state.
 """
 
+import re
 from pathlib import Path
 
 from .state import SessionState
+
+# Maximum spec-base size to avoid context-window exhaustion
+_MAX_SPEC_BYTES = 100_000
+# Minimum fence length for the markdown code block
+_MIN_FENCE_LEN = 4
 
 
 def build_phase_prompt(phase: str, state: SessionState) -> str:
@@ -58,6 +64,135 @@ FINAL CHECKS:
         stack=detect_stack(),
         task=state.current_task_title or "unknown",
     )
+
+
+def _max_consecutive_backticks(text: str) -> int:
+    """Return the maximum number of consecutive backticks in text."""
+    max_count = current = 0
+    for ch in text:
+        if ch == "`":
+            current += 1
+            max_count = max(max_count, current)
+        else:
+            current = 0
+    return max_count
+
+
+def _is_fence_safe(content: str, fence: str) -> bool:
+    """Check that no line in content can close the given fence.
+
+    CommonMark allows a closing fence to be preceded by up to 3 spaces
+    and followed by arbitrary spaces/tabs. The closing fence must have
+    AT LEAST as many backticks as the opening fence. We scan every line
+    for any line that matches: 0-3 spaces + fence + zero or more extra
+    backticks + only spaces/tabs.
+    """
+    # Note: f-string + re.escape means we write "{{0,3}}" to produce
+    # regex "{0,3}" for the space quantifier, while fence is safely escaped.
+    pattern = re.compile(rf"^ {{0,3}}{re.escape(fence)}`*[ \t]*$")
+    for line in content.splitlines():
+        if pattern.match(line):
+            return False
+    return True
+
+
+def _compute_fence(content: str) -> tuple[str, str]:
+    """Return (open_fence, close_fence) that cannot be broken by content.
+
+    Strategy:
+    1. Start with fence_len = max(4, max_consecutive_backticks + 1).
+    2. If any line in content could close this fence (per CommonMark),
+       increment fence_len and re-check until safe.
+    3. Fence length is unbounded; backticks are cheap in context-window terms.
+    """
+    needed = _max_consecutive_backticks(content) + 1
+    fence_len = max(_MIN_FENCE_LEN, needed)
+
+    # Ensure no line in content can close the fence
+    while True:
+        fence = "`" * fence_len
+        if _is_fence_safe(content, fence):
+            return f"{fence}markdown", fence
+        fence_len += 1
+
+
+def build_brainstorm_prompt(root: Path) -> str:
+    """Generate an active brainstorm prompt from spec-behavior-base.md.
+
+    Reads the spec base, truncates if it exceeds _MAX_SPEC_BYTES, detects
+    the longest run of backticks in the content, and wraps it in a markdown
+    fenced code block whose fence cannot be prematurely closed by any line
+    in the content (per CommonMark spec §4.5).
+    Returns a full prompt instructing the agent to write sbtdd/spec-behavior.md.
+    """
+    spec_base = root / "sbtdd" / "spec-behavior-base.md"
+
+    if not spec_base.exists():
+        return (
+            "# SBTDD Workflow\n\n"
+            "**Phase: Specification (Brainstorm)**\n\n"
+            "⚠️ Error: `sbtdd/spec-behavior-base.md` was not found. "
+            "Run `/sbtdd-init` to scaffold it, then fill it in before proceeding."
+        )
+
+    try:
+        actual_size = spec_base.stat().st_size
+        with spec_base.open("rb") as f:
+            raw = f.read(_MAX_SPEC_BYTES + 1)
+        was_truncated = len(raw) > _MAX_SPEC_BYTES
+        content = raw[:_MAX_SPEC_BYTES].decode("utf-8", errors="replace")
+        if was_truncated:
+            truncation_notice = (
+                "\n\n⚠️ **Note:** spec-behavior-base.md exceeds safe size limit "
+                f"({actual_size} bytes > {_MAX_SPEC_BYTES}). Content was truncated. "
+                "Review and split into smaller specs if needed."
+            )
+        else:
+            truncation_notice = ""
+    except OSError as e:
+        return (
+            "# SBTDD Workflow\n\n"
+            "**Phase: Specification (Brainstorm)**\n\n"
+            f"⚠️ Error reading spec-behavior-base.md: {e}. "
+            "Check file permissions and encoding, then run `/sbtdd` again."
+        )
+
+    open_fence, close_fence = _compute_fence(content)
+
+    return f"""# SBTDD Workflow
+
+**Phase: Specification (Brainstorm)**
+
+The base spec is ready. Your task is to generate `sbtdd/spec-behavior.md` by refining and expanding `sbtdd/spec-behavior-base.md`.
+
+## Input — spec-behavior-base.md
+
+{open_fence}
+{content}
+{close_fence}
+{truncation_notice}
+
+## Instructions
+
+1. **Read** the base spec above carefully.
+2. **Refine** it into a full `sbtdd/spec-behavior.md` with this structure:
+   - **Objective** — clear one-sentence feature description
+   - **Requirements (SDD)** — SHALL statements, numbered, unambiguous
+   - **Scenarios (BDD)** — Given / When / Then blocks for each acceptance test
+   - **Constraints** — technical, performance, compatibility limits
+   - **Non-goals** — explicitly out of scope to prevent creep
+3. **Do NOT** include template markers (`<feature-name>`, `<!-- replace:`) in the output.
+4. **Write** the result to `sbtdd/spec-behavior.md` using the appropriate file-writing tool.
+5. **Verify** the file was created and contains no template markers.
+
+## Rules
+- Expand each bullet into concrete, testable statements.
+- BDD scenarios must be atomic (one scenario per behavior).
+- Every requirement MUST be traceable to at least one scenario.
+- Constraints MUST be measurable (e.g., "response time < 200 ms" not "fast").
+
+Next: After writing `sbtdd/spec-behavior.md`, run `/sbtdd` to proceed to planning.
+"""
 
 
 def build_verification_prompt(stack: str) -> str:

@@ -19,6 +19,7 @@ from .scaffolding import (
     create_directories,
     seed_spec_behavior_base,
 )
+from .prompts import build_brainstorm_prompt
 
 
 def _make_sbtdd_handler(ctx: Any) -> Any:
@@ -26,13 +27,16 @@ def _make_sbtdd_handler(ctx: Any) -> Any:
         root = Path(".")
         phase, message = _determine_phase(root)
 
-        if phase == "specification":
+        if phase == "specification_edit":
             return (
                 "# SBTDD Workflow\n\n"
-                "**Phase: Specification**\n\n"
+                "**Phase: Specification (Edit)**\n\n"
                 f"{message}\n\n"
-                "Next: Once the spec is ready, run `/sbtdd` to proceed to planning."
+                "Next: Once the spec base is ready, run `/sbtdd` to begin brainstorming."
             )
+
+        if phase == "specification_brainstorm":
+            return build_brainstorm_prompt(root)
 
         if phase == "planning":
             return (
@@ -72,10 +76,18 @@ def _make_sbtdd_handler(ctx: Any) -> Any:
 
 
 def _has_template_markers(path: Path) -> bool:
-    """Check if spec-behavior-base.md still has template markers."""
+    """Check if spec-behavior-base.md still has template markers.
+
+    Returns True (treat as incomplete) when the file is missing or unreadable.
+    This is a fail-open strategy: if we can't verify the spec is clean, we ask
+    the user to fill it in before proceeding.
+    """
     if not path.exists():
         return True
-    content = path.read_text(encoding="utf-8")
+    try:
+        content = path.read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError):
+        return True
     return "<!-- replace:" in content or "<feature-name>" in content or "<actor>" in content
 
 
@@ -89,14 +101,14 @@ def _determine_phase(root: Path) -> tuple[str, str | None]:
 
     # Check 1: spec-behavior-base.md missing or has markers
     if not spec_base.exists() or _has_template_markers(spec_base):
-        return "specification", (
+        return "specification_edit", (
             "spec-behavior-base.md is missing or still contains template markers. "
             "Please fill it in before proceeding."
         )
 
-    # Check 2: spec-behavior.md absent
+    # Check 2: spec-behavior.md absent — spec-base is ready, start brainstorm
     if not spec.exists():
-        return "specification", ("Please refine spec-behavior-base.md into sbtdd/spec-behavior.md.")
+        return "specification_brainstorm", None
 
     # Check 3: plan absent
     if not plan_org.exists() and not plan.exists():
