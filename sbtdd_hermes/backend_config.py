@@ -18,11 +18,11 @@ DEFAULT_BASE_URL = "http://localhost:11434/v1"
 
 #: Default per-phase models (local-friendly defaults).
 DEFAULT_PHASES: Mapping[str, str] = {
-    "brainstorm": "deepseek-r1:32b",
+    "brainstorm": "deepseek-v4-pro:cloud",
     "planning": "qwen3.5:397b-cloud",
-    "red": "qwen2.5-coder:32b",
-    "green": "qwen2.5-coder:32b",
-    "refactor": "qwen2.5-coder:32b",
+    "red": "kimi-k2.7-code:cloud",
+    "green": "kimi-k2.7-code:cloud",
+    "refactor": "kimi-k2.7-code:cloud",
 }
 
 _KNOWN_TOP_KEYS = {"base_url", "api_key", "phases", "timeout"}
@@ -62,8 +62,8 @@ def resolve_backend_config(
 
     Precedence per key (high → low):
     1. SBTDD-specific env vars (SBTDD_BACKEND_*).
-    2. Repo-level TOML (.hermes/sbtdd-backend.toml).
-    3. Global TOML (~/.hermes/sbtdd-backend.toml).
+    2. Repo-level TOML (.hermes/sbtdd.toml).
+    3. Global TOML (~/.hermes/sbtdd.toml).
     4. Built-in defaults.
 
     SECURITY: api_key is NEVER read from TOML. Only from
@@ -72,9 +72,9 @@ def resolve_backend_config(
     if env is None:
         env = os.environ
     if global_path is None:
-        global_path = os.path.expanduser("~/.hermes/sbtdd-backend.toml")
+        global_path = os.path.expanduser("~/.hermes/sbtdd.toml")
     if repo_path is None:
-        repo_path = os.path.join(os.getcwd(), ".hermes", "sbtdd-backend.toml")
+        repo_path = os.path.join(os.getcwd(), ".hermes", "sbtdd.toml")
 
     g = _load_toml(global_path)
     r = _load_toml(repo_path)

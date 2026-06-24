@@ -4,7 +4,7 @@ description: Read-only SBTDD setup verifier — diagnoses the full configuration
 
 # /sbtdd-check — SBTDD Setup Verifier
 
-**Run all eight checks** below in order. For each check report `PASS`,
+**Run all nine checks** below in order. For each check report `PASS`,
 `FAIL <reason>`, or `N/A <reason>` (where applicable) with a one-line
 remediation hint. Check 6 may legitimately report `N/A` when no session
 state file exists yet.
@@ -176,6 +176,26 @@ input — e.g. `/skill magi "Reply OK."` (the mode is a positional argument).
 
 ---
 
+## Check 9 — SBTDD backend configuration
+
+Verify that `.hermes/sbtdd.toml` exists and is parseable. This file configures
+the OpenAI-compatible backend (Ollama, OpenRouter, etc.) for automated SBTDD
+phases such as specification brainstorming and plan generation.
+
+**Check:**
+1. `.hermes/sbtdd.toml` exists.
+2. It is valid TOML (parse without error).
+3. It contains a `base_url` key with a non-empty value.
+4. The `[phases]` table has at least one entry.
+
+**FAIL remediation:** run `/sbtdd-init` to scaffold the file from the template, then edit
+the values to match your backend (e.g., `base_url = "http://localhost:11434/v1"`).
+
+> **Note:** The actual API key is never stored in this file; it is read from the
+> `SBTDD_BACKEND_API_KEY` environment variable at runtime.
+
+---
+
 ## Summary output
 
 After all checks, print a summary table:
@@ -190,6 +210,7 @@ After all checks, print a summary table:
 | 6 | State-file drift check             | PASS / FAIL / N/A |
 | 7 | Required skills available          | PASS / FAIL |
 | 8 | Active MAGI backend (default / Ollama + smoke test) | PASS / FAIL |
+| 9 | SBTDD backend config (`sbtdd.toml`) | PASS / FAIL |
 
 If **any check fails**, end with:
 

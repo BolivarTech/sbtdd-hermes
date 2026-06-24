@@ -226,9 +226,9 @@ def _make_sbtdd_init_handler(ctx: Any) -> Any:
         state_path.write_text(json.dumps(state.to_dict(), indent=2), encoding="utf-8")
 
         # Scaffold backend config if not exists
-        backend_cfg_path = root / ".hermes" / "sbtdd-backend.toml"
+        backend_cfg_path = root / ".hermes" / "sbtdd.toml"
         if not backend_cfg_path.exists():
-            tmpl = Path(__file__).parent / "templates" / "sbtdd-backend.toml.tmpl"
+            tmpl = Path(__file__).parent.parent / "templates" / "sbtdd.toml.tmpl"
             if tmpl.exists():
                 backend_cfg_path.write_text(tmpl.read_text(encoding="utf-8"), encoding="utf-8")
 
@@ -245,6 +245,7 @@ def _make_sbtdd_init_handler(ctx: Any) -> Any:
             f"| Directories | {', '.join(dirs) or 'all exist'} |",
             f"| Spec base | {spec_path} |",
             f"| Session state | {state_path} |",
+            f"| Backend config | {backend_cfg_path} |",
             f"| Ollama | {'enabled' if use_ollama else 'default'} |",
             "",
             "Next: Edit `sbtdd/spec-behavior-base.md` then run `/sbtdd` to begin.",
@@ -349,6 +350,22 @@ def _make_sbtdd_check_handler(ctx: Any) -> Any:
         # Check 6: Git repo initialized
         git_exists = (root / ".git").exists()
         checks.append(("Git repository", git_exists))
+
+        # Check 9: SBTDD backend config (sbtdd.toml) — mirrors MAGI's ollama.toml pattern
+        backend_toml = root / ".hermes" / "sbtdd.toml"
+        backend_toml_ok = False
+        if backend_toml.exists():
+            try:
+                import tomllib
+                with open(backend_toml, "rb") as f:
+                    cfg = tomllib.load(f)
+                backend_toml_ok = bool(
+                    cfg.get("base_url", "").strip()
+                    and cfg.get("phases")
+                )
+            except Exception:
+                backend_toml_ok = False
+        checks.append(("SBTDD backend config (sbtdd.toml)", backend_toml_ok))
 
         # Build table
         lines = ["# SBTDD Check Results", ""]

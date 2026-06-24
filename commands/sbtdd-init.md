@@ -141,7 +141,22 @@ Backend Selection).
 
 ---
 
-## Step 7 — Final report
+## Step 7 — Scaffold SBTDD backend config
+
+If `.hermes/sbtdd.toml` does not exist, copy `${PLUGIN_ROOT}/templates/sbtdd.toml.tmpl`
+to `.hermes/sbtdd.toml`. This file configures the OpenAI-compatible backend (Ollama,
+OpenRouter, etc.) for automated SBTDD phases. It is safe to commit with placeholder
+values because the API key is only read from the `SBTDD_BACKEND_API_KEY` env var.
+
+If `.hermes/sbtdd.toml` already exists, skip it and report "skipped (already present)".
+
+> **Note:** Without `--ollama-init`, the backend config is created but the default
+> MAGI backend remains Claude. Use `--ollama-init` to also scaffold the MAGI Ollama
+> config (`magi-ollama.toml`) and switch the MAGI backend.
+
+---
+
+## Step 8 — Final report
 
 Print a summary table:
 
@@ -154,6 +169,7 @@ Print a summary table:
 | `planning/`                   | created / skipped |
 | `.hermes/`                    | created / skipped |
 | `sbtdd/spec-behavior-base.md` | created / skipped |
+| `.hermes/sbtdd.toml`          | created / skipped |
 | `.hermes/magi-ollama.toml` (with `--ollama-init`) | created / skipped / n/a |
 | `.gitignore` entries          | added N / all present |
 

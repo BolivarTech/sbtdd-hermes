@@ -117,7 +117,7 @@ def test_sbtdd_check_covers_eight_items():
     assert "read-only" in t.lower() or "does not fix" in t.lower()
     assert "sbtdd-init" in t
     assert "Check 8" in t
-    assert "eight" in t.lower()
+    assert "nine" in t.lower()
     assert "description:" in t
 
 
